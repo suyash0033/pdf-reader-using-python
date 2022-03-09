@@ -1,0 +1,143 @@
+# Import the python text to speech libarary, GUI library and the PDF REader library
+from tkinter import *
+import pyttsx3 
+import PyPDF2
+from tkinter.filedialog import askopenfilename
+
+
+def begin():    
+    global window1
+    window1=Tk()
+        
+    lbl1=Label(window1, text="PDF to Speech Converter", fg='black', font=("Helvetica", 14))
+    lbl1.place(x=45, y=50)
+    
+    con=Button(window1, text="Continue", fg='blue',command=lambda:initial())
+    con.place(x=110, y=100)
+   
+    window1.title('Pdf Reader')
+    window1.geometry("300x200+400+200")
+    window1.mainloop()
+
+
+def initial():
+    window1.destroy()
+    global window2
+    window2=Tk()
+    lbl=Label(window2, text="Choose Your Speed", fg='black', font=("Helvetica", 14))
+    lbl.place(x=60, y=50)
+   
+    btn1=Button(window2, text='1.0x', command=lambda:del_initial(v=100))
+    btn1.place(x=99,y=130)
+    
+    btn2=Button(window2, text='2.0x', command=lambda:del_initial(v=200))
+    btn2.place(x=149,y=130)
+    
+    btn3=Button(window2, text='0.5x', command=lambda:del_initial(v=50))
+    btn3.place(x=99,y=100)
+    
+    btn4=Button(window2, text='1.5x', command=lambda:del_initial(v=150))
+    btn4.place(x=149,y=100) 
+
+    window2.title('Pdf Reader')
+    window2.geometry("300x200+400+200")
+    window2.mainloop()
+
+
+def del_initial(v):
+    window2.destroy()
+    browsee(v)
+
+
+def browsee(v):    
+    global window3
+    window3=Tk()
+        
+    lbl1=Label(window3, text="Select File", fg='black', font=("Helvetica", 14))
+    lbl1.place(x=100, y=50)
+    
+    brow=Button(window3, text="Browse", fg='blue',command=lambda:last(v))
+    brow.place(x=123, y=100)
+   
+    window3.title('Pdf Reader')
+    window3.geometry("300x200+400+200")
+    window3.mainloop()
+
+
+def last(v):
+    filename = askopenfilename()
+    window3.destroy()
+    last_chars = filename[-4:]
+    if last_chars != ".pdf":
+        error(v)
+    else:
+        global window4
+        window4 = Tk()
+        window4.geometry("300x200+400+200")
+    
+        lbl=Label(window4, text="ENJOY!", fg='black', font=("Helvetica", 14))
+        lbl.place(x=105, y=50)
+    
+        window4.title('Pdf Reader')
+
+        start=Button(window4, text="Start", fg='blue', font=("Helvetica", 14),command=lambda:filesel(v,filename))
+        start.place(x=113, y=100)
+    
+        window4.mainloop()   
+
+
+def error(v):    
+    global window5
+    window5=Tk()
+        
+    lb1=Label(window5, text="ERROR!", fg='black', font=("Helvetica", 16))
+    lb1.place(x=102, y=55)
+
+    lb2=Label(window5, text="Selected file is not a pdf", fg='black', font=("Helvetica", 14))
+    lb2.place(x=45, y=85)
+
+    exi=Button(window5, text="EXIT", fg='blue',command=lambda:quit())
+    exi.place(x=165, y=125)
+
+    trya=Button(window5, text="Try Again!", fg='blue',command=lambda:del_error(v))
+    trya.place(x=80, y=125)
+   
+    window5.title('Pdf Reader')
+    window5.geometry("300x200+400+200")
+    window5.mainloop()    
+
+
+def del_error(v):
+    window5.destroy()
+    browsee(v)
+
+
+def filesel(v,filename):
+    # Read the PDF file binary mode
+    pdf_file = open(filename, 'rb')
+    read_pdf = PyPDF2.PdfFileReader(pdf_file, strict=False)
+    #Find the number of pages in the PDF document
+    number_of_pages = read_pdf.getNumPages()
+    # init function to get an engine instance for the speech synthesis  
+    engine = pyttsx3.init()
+    for i in range(0, number_of_pages ):
+        # Read the PDF page 
+        page = read_pdf.getPage(i)
+
+        # Extract the text of the PDF page 
+        page_content = page.extractText()
+
+        # set the audio speed and volume
+        newrate=v
+        engine.setProperty('rate', newrate)
+        newvolume=200
+        engine.setProperty('volume', newvolume)
+
+        # say method on the engine that passing input text to be spoken 
+        engine.say(page_content) 
+
+        # run and wait method to processes the voice commands.  
+        engine.runAndWait()
+
+
+begin()
